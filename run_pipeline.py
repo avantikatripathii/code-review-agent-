@@ -2,6 +2,7 @@ from parser.parser_main import find_python_files, read_file_content
 from ast_analysis.ast_main import analyze_file
 from static_analysis.static_main import analyze_file_static
 from dependency_graph.graph_main import build_dependency_graph
+from llm_reasoning.llm_main import get_llm_review
 
 
 def run(repo_path):
@@ -39,13 +40,16 @@ def run(repo_path):
         print(f"  Ruff issues: {len(combined_result['ruff_issues'])}")
         print(f"  Bandit issues: {len(combined_result['bandit_issues'])}")
 
-    # build dependency graph across all files
     graph = build_dependency_graph(files_with_content)
     print(f"\nDependency graph: {graph.number_of_nodes()} nodes, {graph.number_of_edges()} edges")
     for source, target in graph.edges():
         print(f"  {source}  →  {target}")
 
-    return all_results, graph
+    print("\nGenerating LLM review...\n")
+    review = get_llm_review(all_results)
+    print(review)
+
+    return all_results, graph, review
 
 
 if __name__ == "__main__":
