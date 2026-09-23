@@ -3,6 +3,7 @@ from ast_analysis.ast_main import analyze_file
 from static_analysis.static_main import analyze_file_static
 from dependency_graph.graph_main import build_dependency_graph
 from llm_reasoning.llm_main import get_llm_review
+from report.report_main import generate_markdown_report, save_report
 
 
 def run(repo_path):
@@ -34,20 +35,13 @@ def run(repo_path):
         }
         all_results.append(combined_result)
 
-        print(f"{file_path}")
-        print(f"  Functions: {[f['name'] for f in combined_result['functions']]}")
-        print(f"  Classes:   {[c['name'] for c in combined_result['classes']]}")
-        print(f"  Ruff issues: {len(combined_result['ruff_issues'])}")
-        print(f"  Bandit issues: {len(combined_result['bandit_issues'])}")
-
     graph = build_dependency_graph(files_with_content)
-    print(f"\nDependency graph: {graph.number_of_nodes()} nodes, {graph.number_of_edges()} edges")
-    for source, target in graph.edges():
-        print(f"  {source}  →  {target}")
 
-    print("\nGenerating LLM review...\n")
+    print("Generating LLM review...\n")
     review = get_llm_review(all_results)
-    print(review)
+
+    report_content = generate_markdown_report(repo_path, all_results, graph, review)
+    save_report(report_content)
 
     return all_results, graph, review
 
