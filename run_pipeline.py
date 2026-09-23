@@ -45,7 +45,6 @@ def run(repo_path):
 
     return all_results, graph, review
 
-
 if __name__ == "__main__":
-    repo_path = "."
-    run(repo_path)
+    repo_path = "../requests-html"
+run(repo_path)

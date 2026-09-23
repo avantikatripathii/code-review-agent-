@@ -1,87 +1,61 @@
 # Code Review Report
-**Repository:** `.`
-**Generated:** 2026-09-23 11:16
+**Repository:** `../requests-html`
+**Generated:** 2026-09-23 11:30
 
 ---
 
 ## Summary
-- **Files analyzed:** 15
-- **Ruff issues found:** 10
+- **Files analyzed:** 5
+- **Ruff issues found:** 58
 - **Bandit (security) issues found:** 0
-- **Dependency graph:** 15 nodes, 8 edges
+- **Dependency graph:** 5 nodes, 0 edges
 
 ---
 
 ## AI-Generated Review
 
-**General Notes**
-
-All the issues flagged by the linter are purely stylistic or defensive‑coding concerns – no security vulnerabilities were detected.  
-Below are file‑specific comments that can be applied as in‑line PR review comments or as a checklist for the author.
+**Overall Summary**  
+The codebase contains a number of style, type‑hinting, and Python‑3 compatibility issues flagged by Ruff. Most of them are non‑functional – they don’t break the tests – but they hinder readability, maintainability, and future‑proofing. The fixes below are grouped per file, with severity tags and actionable patches.
 
 ---
 
-### 1. `.\run_pipeline.py`
+## `../requests-html/requests_html.py`
 
-| Issue | Severity | Suggested Fix |
-|-------|----------|---------------|
-| Import block is unsorted / un‑formatted | **Low** | Re‑order imports alphabetically and group by standard, third‑party, local modules. Add a blank line between groups. Example: |
-| | | ```python<br>import os<br>import sys<br><br>from . import helpers<br>from .config import settings<br>``` |
-
----
-
-### 2. `.\dependency_graph\graph_main.py`
-
-| Issue | Severity | Suggested Fix |
-|-------|----------|---------------|
-| Import block unsorted | **Low** | Same as above – alphabetise and separate groups. |
-| Nested `if` statements at line 19 | **Medium** | Combine conditions into a single `if` using `and`/`or`. Example: |
-| | | ```python<br>if condition_a and condition_b:<br>    ...<br>``` |
+| # | Key Problems (plain English) | Severity | Suggested Fix |
+|---|------------------------------|----------|---------------|
+| 1 | Imports are unsorted/unsorted and use deprecated typing (`typing.List`, `typing.Set`, `MutableMapping` from `collections`). | Medium | Re‑order imports alphabetically; replace `typing.List`/`Set` with built‑in `list`/`set`; import `MutableMapping` from `collections.abc`. |
+| 2 | Type annotations still use legacy `List`, `Set` and implicit `Optional`. | Medium | Convert to `list`, `set`, and use `| None` or `X | Y` syntax. |
+| 3 | `sys.version_info.minor` comparison against an integer is wrong. | Medium | Compare to a tuple: `if sys.version_info >= (3, 9)` instead of `sys.version_info.minor < 9`. |
+| 4 | Several places use `super(__class__, self)` instead of the preferred `super()`. | Low | Replace all `super(__class__, self)` with `super()`. |
+| 5 | `format()` calls can be replaced with f‑strings for readability. | Low | Convert `"...".format(...)` to f‑strings. |
+| 6 | Mutable default arguments (`list()`, `dict()`, etc.) in function signatures. | High | Change to `None` defaults and instantiate inside the function. |
+| 7 | Bare `except:` blocks. | Medium | Catch specific exceptions (e.g., `except Exception:`) or at least log the exception. |
+| 8 | Unnecessary list comprehension (`[x for x in ...]` that is not used). | Low | Remove or assign to a variable if needed. |
+| 9 | `Element.__slots__` is not sorted. | Low | Sort slots alphabetically. |
+| 10 | Several implicit `Optional` type hints (e.g., `def f(a):`). | Medium | Explicitly annotate with `| None` or `Optional`. |
 
 ---
 
-### 3. `.\llm_reasoning\llm_main.py`
+## `../requests-html/setup.py`
 
-| Issue | Severity | Suggested Fix |
-|-------|----------|---------------|
-| Import block unsorted | **Low** | Re‑order and group imports. |
-| `json` imported but never used | **Low** | Remove the `import json` line or add a comment explaining its future use. |
-
----
-
-### 4. `.\report\report_main.py`
-
-| Issue | Severity | Suggested Fix |
-|-------|----------|---------------|
-| F‑string without placeholders (line 7) | **Low** | Replace with a plain string or add a placeholder if needed. Example: |
-| | | ```python<br>message = "Report generated for {title}"<br>``` |
-| `datetime.datetime.now()` without timezone (line 9) | **Medium** | Use timezone‑aware datetime: `datetime.datetime.now(datetime.timezone.utc)` or inject a `tz` argument from the calling context. |
+| # | Key Problems | Severity | Suggested Fix |
+|---|---------------|----------|---------------|
+| 1 | Unnecessary `# -*- coding: utf-8 -*-` header. | Low | Remove the encoding comment. |
+| 2 | Import block unsorted. | Low | Alphabetically sort imports. |
+| 3 | Uses `io.open` instead of built‑in `open`. | Low | Replace with `open(..., encoding='utf-8')`. |
+| 4 | Mutable default value for a class attribute (`install_requires=...`). | Medium | Set default to `None` and assign inside the `__init__`. |
+| 5 | Format strings use positional indices (`'{0}'.format(...)`). | Low | Switch to f‑strings. |
+| 6 | Several string formatting calls that could be f‑strings. | Low | Convert to f‑strings. |
 
 ---
 
-### 5. `.\static_analysis\static_main.py`
+## `../requests-html/docs/source/conf.py`
 
-| Issue | Severity | Suggested Fix |
-|-------|----------|---------------|
-| Import block unsorted | **Low** | Alphabetise and group imports. |
-| `subprocess.run` without `check=True` (lines 7 & 33) | **Medium** | Pass `check=True` to raise `CalledProcessError` on non‑zero exit codes, ensuring failures are surfaced. Example: |
-| | | ```python<br>subprocess.run(cmd, check=True, capture_output=True, text=True)<br>``` |
-
----
-
-**Overall Recommendation**
-
-Apply the fixes above to clean up import hygiene and strengthen defensive coding. No functional changes are required; these adjustments will improve readability, maintainability, and robustness. Once the changes are merged, re‑run the linter to confirm that all issues have been resolved.
+| # | Key Problems | Severity | Suggested Fix |
+|---|---------------|----------|---------------|
+| 1 | Encoding
 
 ---
 
 ## Dependency Graph
 
-- `.\run_pipeline.py` → `.\parser\parser_main.py`
-- `.\run_pipeline.py` → `.\ast_analysis\ast_main.py`
-- `.\run_pipeline.py` → `.\static_analysis\static_main.py`
-- `.\run_pipeline.py` → `.\dependency_graph\graph_main.py`
-- `.\run_pipeline.py` → `.\llm_reasoning\llm_main.py`
-- `.\run_pipeline.py` → `.\report\report_main.py`
-- `.\dependency_graph\graph_main.py` → `.\parser\parser_main.py`
-- `.\test_analysis\test_main.py` → `.\parser\parser_main.py`
