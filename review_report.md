@@ -1,6 +1,6 @@
 # Code Review Report
 **Repository:** `../requests-html`
-**Generated:** 2026-09-23 11:30
+**Generated:** 2026-09-23 12:29
 
 ---
 
@@ -14,46 +14,35 @@
 
 ## AI-Generated Review
 
-**Overall Summary**  
-The codebase contains a number of style, type‑hinting, and Python‑3 compatibility issues flagged by Ruff. Most of them are non‑functional – they don’t break the tests – but they hinder readability, maintainability, and future‑proofing. The fixes below are grouped per file, with severity tags and actionable patches.
+**General note**  
+The lint output shows a mix of style, type‑hint, and defensive‑programming issues. Most of them are harmless but they clutter the codebase and make it harder for future contributors to read. Fixing them now will bring the project in line with modern Python 3.11+ best practices. Below are the key problems per file, a severity rating, and a concrete change you can apply.  
 
 ---
 
 ## `../requests-html/requests_html.py`
 
-| # | Key Problems (plain English) | Severity | Suggested Fix |
-|---|------------------------------|----------|---------------|
-| 1 | Imports are unsorted/unsorted and use deprecated typing (`typing.List`, `typing.Set`, `MutableMapping` from `collections`). | Medium | Re‑order imports alphabetically; replace `typing.List`/`Set` with built‑in `list`/`set`; import `MutableMapping` from `collections.abc`. |
-| 2 | Type annotations still use legacy `List`, `Set` and implicit `Optional`. | Medium | Convert to `list`, `set`, and use `| None` or `X | Y` syntax. |
-| 3 | `sys.version_info.minor` comparison against an integer is wrong. | Medium | Compare to a tuple: `if sys.version_info >= (3, 9)` instead of `sys.version_info.minor < 9`. |
-| 4 | Several places use `super(__class__, self)` instead of the preferred `super()`. | Low | Replace all `super(__class__, self)` with `super()`. |
-| 5 | `format()` calls can be replaced with f‑strings for readability. | Low | Convert `"...".format(...)` to f‑strings. |
-| 6 | Mutable default arguments (`list()`, `dict()`, etc.) in function signatures. | High | Change to `None` defaults and instantiate inside the function. |
-| 7 | Bare `except:` blocks. | Medium | Catch specific exceptions (e.g., `except Exception:`) or at least log the exception. |
-| 8 | Unnecessary list comprehension (`[x for x in ...]` that is not used). | Low | Remove or assign to a variable if needed. |
-| 9 | `Element.__slots__` is not sorted. | Low | Sort slots alphabetically. |
-| 10 | Several implicit `Optional` type hints (e.g., `def f(a):`). | Medium | Explicitly annotate with `| None` or `Optional`. |
+| # | Issue | Severity | Suggested fix |
+|---|--------|----------|---------------|
+| 1 | Import block is unsorted / un‑formatted | **Low** | Re‑order imports alphabetically, group stdlib → third‑party → local, and remove unused imports. |
+| 2 | `MutableMapping` should be imported from `collections.abc` | **Low** | Replace `from typing import MutableMapping` with `from collections.abc import MutableMapping`. |
+| 3 | Deprecated `typing.Set/List` usage | **Low** | Use the built‑in `set` / `list` in annotations (e.g., `def foo(a: list[int])`). |
+| 4 | Use `X | Y` instead of `Optional` or `Union` | **Low** | Change `Optional[int]` to `int | None`, `Union[int, float]` to `int | float`, etc. |
+| 5 | `sys.version_info.minor` comparison to int (Python 4) | **Medium** | Compare `sys.version_info` to a tuple: `if sys.version_info < (4, 0, 0): …`. |
+| 6 | PEP 484 implicit `Optional` in annotations | **Low** | Explicitly annotate as `X | None` or `X | Y`. |
+| 7 | `Element.__slots__` not sorted | **Low** | Sort the slot names alphabetically. |
+| 8 | `super(__class__, self)` usage | **Low** | Replace with `super()` everywhere. |
+| 9 | `format()` where f‑string is clearer | **Low** | Convert to f‑string: `f'{var}'`. |
+|10 | Mutable default values (e.g., `[]`, `{}`) in function signatures | **Medium** | Use `None` as default and create the mutable object inside the function. |
+|11 | Bare `except:` clauses | **High** | Catch a specific exception (`except SomeError:`). |
+|12 | Unnecessary list comprehensions | **Low** | Replace with generator expressions or direct filtering (`[x for x in y if cond]` → `[x for x in y if cond]` is fine; if the comprehension is used just for side‑effect, remove it). |
+|13 | `float` instead of `int | float` | **Low** | Use `float` if the value will always be a float, otherwise use `int | float`. |
 
 ---
 
 ## `../requests-html/setup.py`
 
-| # | Key Problems | Severity | Suggested Fix |
-|---|---------------|----------|---------------|
-| 1 | Unnecessary `# -*- coding: utf-8 -*-` header. | Low | Remove the encoding comment. |
-| 2 | Import block unsorted. | Low | Alphabetically sort imports. |
-| 3 | Uses `io.open` instead of built‑in `open`. | Low | Replace with `open(..., encoding='utf-8')`. |
-| 4 | Mutable default value for a class attribute (`install_requires=...`). | Medium | Set default to `None` and assign inside the `__init__`. |
-| 5 | Format strings use positional indices (`'{0}'.format(...)`). | Low | Switch to f‑strings. |
-| 6 | Several string formatting calls that could be f‑strings. | Low | Convert to f‑strings. |
+| # | Issue | Severity | Suggested fix |
 
----
-
-## `../requests-html/docs/source/conf.py`
-
-| # | Key Problems | Severity | Suggested Fix |
-|---|---------------|----------|---------------|
-| 1 | Encoding
 
 ---
 
