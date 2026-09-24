@@ -1,5 +1,10 @@
 name: AI Code Review
+permissions:
+  pull-requests: write
 
+on:
+  pull_request:
+    branches: [main]
 on:
   pull_request:
     branches: [main]
@@ -30,4 +35,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          
